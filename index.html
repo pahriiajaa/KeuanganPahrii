@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0F5C5A">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Catatan Keuangan</title>
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap">
@@ -21,8 +23,10 @@
   <script defer src="js/auth.js"></script>
   <script defer src="js/storage.js"></script>
   <script defer src="js/store.js"></script>
+  <script defer src="js/sync.js"></script>
   <script defer src="js/render.js"></script>
   <script defer src="js/sheet.js"></script>
+  <script defer src="js/pwa.js"></script>
   <script defer src="js/app.js"></script>
 </head>
 <body>
@@ -38,6 +42,9 @@
         <button type="button" id="next" aria-label="Bulan berikutnya">›</button>
       </div>
     </header>
+
+    <!-- Status sinkron: Tersinkron / Offline / dll -->
+    <div class="status" id="status" data-state="busy" role="status">Memuat...</div>
 
     <!-- Halaman: Beranda -->
     <div id="v-home">
@@ -90,6 +97,13 @@
           <div class="row"><span>Masuk sebagai</span><span id="akun-email">-</span></div>
         </div>
         <button class="btn-danger" type="button" id="logout">Keluar</button>
+        <p class="note" id="logout-note" hidden></p>
+      </section>
+
+      <section>
+        <h2>Aplikasi</h2>
+        <button class="btn-primary btn-install" type="button" id="install" hidden>Pasang aplikasi di HP</button>
+        <p class="note">Di Chrome HP: menu ⋮ lalu "Instal aplikasi" atau "Tambahkan ke layar utama". Di iPhone (Safari): tombol Bagikan lalu "Tambah ke Layar Utama".</p>
       </section>
 
       <section>
@@ -130,8 +144,6 @@
 
     <label for="tanggal">Tanggal</label>
     <input id="tanggal" type="date">
-
-    <p class="form-error" id="sheet-error" hidden></p>
 
     <button class="btn-primary" type="button" id="save">Simpan transaksi</button>
     <button class="btn-danger" type="button" id="del" hidden>Hapus transaksi</button>
