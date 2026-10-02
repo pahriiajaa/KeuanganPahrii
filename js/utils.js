@@ -53,8 +53,18 @@ App.utils = (() => {
   const formatMonthShort = (year, month) =>
     new Date(year, month, 1).toLocaleDateString("id-ID", { month: "short" });
 
+  /** ID acak unik, dibuat di HP supaya transaksi bisa dicatat saat offline */
+  const uuid = () => {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (huruf) => {
+      const acak = (Math.random() * 16) | 0;
+      return (huruf === "x" ? acak : (acak & 0x3) | 0x8).toString(16);
+    });
+  };
+
   return {
     $,
+    uuid,
     pad,
     rupiah,
     escapeHtml,
