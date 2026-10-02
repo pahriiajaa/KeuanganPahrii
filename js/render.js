@@ -36,6 +36,10 @@ App.render = (() => {
 
   /** Daftar transaksi di Beranda */
   const renderList = (items) => {
+    if (!App.store.isReady()) {
+      $("list").innerHTML = '<div class="empty">Memuat data...</div>';
+      return;
+    }
     $("list").innerHTML = items.length
       ? items.map(transactionHtml).join("")
       : '<div class="empty">Belum ada transaksi bulan ini. Ketuk + untuk menambah.</div>';
@@ -106,5 +110,11 @@ App.render = (() => {
     renderStats(items, total);
   };
 
-  return { all };
+  /** Tulisan status sinkron di bawah judul. state: ok | busy | offline | error */
+  const setStatus = (teks, state) => {
+    $("status").textContent = teks;
+    $("status").dataset.state = state;
+  };
+
+  return { all, setStatus };
 })();
