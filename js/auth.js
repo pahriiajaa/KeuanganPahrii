@@ -10,10 +10,18 @@ App.auth = (() => {
 
   // ---------- Akses ke Supabase ----------
 
-  /** Pengguna yang sedang login, atau null */
+  /** Pengguna yang sedang login, atau null.
+      Saat offline dan sesi tidak bisa diperiksa, pakai pengguna terakhir
+      yang tersimpan di HP supaya aplikasi tetap bisa dibuka. */
   const getUser = async () => {
-    const { data } = await auth().getSession();
-    return data.session ? data.session.user : null;
+    try {
+      const { data } = await auth().getSession();
+      if (data.session) return data.session.user;
+    } catch {
+      /* gagal memeriksa sesi: lanjut ke cadangan di bawah */
+    }
+    if (!navigator.onLine) return App.storage.loadLastUser();
+    return null;
   };
 
   /** Buka halaman login Google. Setelah berhasil, Google mengembalikan
@@ -48,8 +56,10 @@ App.auth = (() => {
     $("login-pesan").textContent = teks;
   };
 
-  /** Pasang tombol. onLogout() dipanggil setelah keluar akun */
-  const init = ({ onLogout }) => {
+  /** Pasang tombol.
+      canLogout() mengembalikan teks alasan jika belum boleh keluar, atau "" jika boleh.
+      onLogout() dipanggil setelah keluar akun. */
+  const init = ({ canLogout, onLogout }) => {
     $("google-btn").addEventListener("click", async () => {
       setMessage("");
       $("google-btn").disabled = true;
@@ -63,6 +73,11 @@ App.auth = (() => {
     });
 
     $("logout").addEventListener("click", async () => {
+      const alasan = canLogout();
+      $("logout-note").textContent = alasan;
+      $("logout-note").hidden = !alasan;
+      if (alasan) return;
+
       await signOut();
       onLogout();
     });
