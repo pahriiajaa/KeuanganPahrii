@@ -49,12 +49,14 @@ App.auth = (() => {
 
   const showLogin = () => {
     $("login").hidden = false;
+    document.body.classList.add("login-open");
     $("login-pesan").textContent = "";
     $("password").value = "";
   };
 
   const hideLogin = () => {
     $("login").hidden = true;
+    document.body.classList.remove("login-open");
   };
 
   const setMessage = (teks) => {
