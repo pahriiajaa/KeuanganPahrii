@@ -1,27 +1,62 @@
 /* ==========================================================
    store.js
-   Salinan data transaksi di memori + operasinya.
-   Setiap perubahan dikirim dulu ke Supabase lewat storage.js;
-   kalau berhasil, baru salinan di memori ikut diubah.
+   Data transaksi di memori + antrean perubahan.
+
+   Cara kerja offline:
+   - Setiap perubahan langsung dilakukan di HP dan dicatat di
+     "antrean" (queue).
+   - js/sync.js yang mengirim antrean itu ke Supabase saat ada internet.
+
+   Bentuk satu entri antrean:
+   { op: "add" | "update" | "remove" | "clear", id: "..." }
+   (isi transaksi diambil dari data terbaru saat dikirim)
    ========================================================== */
 
 App.store = (() => {
+  const { uuid } = App.utils;
+
   const today = new Date();
 
   /** Bulan yang sedang ditampilkan */
   const current = { year: today.getFullYear(), month: today.getMonth() };
 
+  let userId = null;
   let transactions = [];
+  let queue = [];
+  let ready = false; // true jika data sudah ada (dari salinan HP atau Supabase)
 
-  // ---------- Memuat / mengosongkan ----------
-
-  const load = async () => {
-    transactions = await App.storage.loadTransactions();
+  /** Simpan salinan data dan antrean ke HP */
+  const persist = () => {
+    if (!userId) return;
+    App.storage.saveCache(userId, transactions);
+    App.storage.saveQueue(userId, queue);
   };
 
-  /** Dipanggil saat keluar akun, supaya data tidak tersisa di layar */
-  const reset = () => {
+  // ---------- Pengguna ----------
+
+  const hasUser = () => userId !== null;
+
+  /** Muat salinan data milik pengguna dari HP */
+  const useUser = (id) => {
+    userId = id;
+    const cache = App.storage.loadCache(id);
+    transactions = cache || [];
+    queue = App.storage.loadQueue(id);
+    ready = cache !== null;
+  };
+
+  /** Dipanggil saat keluar akun: hapus semua data dari HP dan memori */
+  const forgetUser = () => {
+    if (userId) App.storage.clearUserData(userId);
+    userId = null;
     transactions = [];
+    queue = [];
+    ready = false;
+  };
+
+  const isReady = () => ready;
+  const markReady = () => {
+    ready = true;
   };
 
   // ---------- Membaca data ----------
@@ -48,27 +83,57 @@ App.store = (() => {
 
   const find = (id) => transactions.find((item) => item.id === id) || null;
 
-  // ---------- Mengubah data (async, karena menunggu database) ----------
+  // ---------- Mengubah data (langsung, tanpa menunggu internet) ----------
 
-  const add = async (data) => {
-    const saved = await App.storage.addTransaction(data);
-    transactions.push(saved);
+  const hasPendingWrite = (id) =>
+    queue.some((entry) => entry.id === id && (entry.op === "add" || entry.op === "update"));
+
+  const add = ({ t, n, a, d }) => {
+    const id = uuid();
+    transactions.push({ id, t, n, a, d });
+    queue.push({ op: "add", id });
+    persist();
   };
 
-  const update = async (id, data) => {
-    await App.storage.updateTransaction(id, data);
+  const update = (id, { t, n, a, d }) => {
     const item = find(id);
-    if (item) Object.assign(item, data);
+    if (!item) return;
+    Object.assign(item, { t, n, a, d });
+    // Kalau sudah ada antrean tambah/ubah untuk id ini, datanya otomatis ikut terbaru
+    if (!hasPendingWrite(id)) queue.push({ op: "update", id });
+    persist();
   };
 
-  const remove = async (id) => {
-    await App.storage.removeTransaction(id);
+  const remove = (id) => {
     transactions = transactions.filter((item) => item.id !== id);
+    const belumTerkirim = queue.some((entry) => entry.op === "add" && entry.id === id);
+    queue = queue.filter((entry) => entry.id !== id);
+    // Transaksi yang belum pernah terkirim cukup dibuang, tidak perlu dihapus di database
+    if (!belumTerkirim) queue.push({ op: "remove", id });
+    persist();
   };
 
-  const clear = async () => {
-    await App.storage.clearTransactions();
+  const clear = () => {
     transactions = [];
+    queue = [{ op: "clear" }];
+    persist();
+  };
+
+  // ---------- Dipakai oleh sync.js ----------
+
+  const queueLength = () => queue.length;
+  const peekQueue = () => queue[0];
+
+  const shiftQueue = () => {
+    queue.shift();
+    persist();
+  };
+
+  /** Ganti seluruh data dengan data terbaru dari Supabase */
+  const setAll = (list) => {
+    transactions = list;
+    ready = true;
+    persist();
   };
 
   // ---------- Bulan yang ditampilkan ----------
@@ -91,8 +156,11 @@ App.store = (() => {
   return {
     today,
     current,
-    load,
-    reset,
+    hasUser,
+    useUser,
+    forgetUser,
+    isReady,
+    markReady,
     inMonth,
     totals,
     find,
@@ -100,6 +168,10 @@ App.store = (() => {
     update,
     remove,
     clear,
+    queueLength,
+    peekQueue,
+    shiftQueue,
+    setAll,
     moveMonth,
     goToDate,
     isCurrentMonth,
