@@ -83,7 +83,7 @@
       button.textContent = LABEL;
     };
 
-    button.addEventListener("click", async () => {
+    button.addEventListener("click", () => {
       if (!button.dataset.sure) {
         button.dataset.sure = "1";
         button.textContent = "Ketuk lagi untuk menghapus semua";
@@ -93,36 +93,38 @@
 
       clearTimeout(timer);
       cancelConfirm();
-      try {
-        await App.store.clear();
-        App.render.all();
-      } catch {
-        button.textContent = "Gagal menghapus. Coba lagi.";
-        setTimeout(cancelConfirm, 3000);
-      }
+      App.store.clear();
+      App.render.all();
+      App.sync.showIdleStatus();
+      App.sync.run();
     });
   };
 
   // ---------- Masuk / keluar akun ----------
 
-  /** Dipanggil setelah berhasil login (atau sudah login sebelumnya) */
-  const enterApp = async (user) => {
+  /** Dipanggil setelah login (atau sudah login sebelumnya) */
+  const enterApp = (user) => {
+    App.storage.saveLastUser({ id: user.id, email: user.email });
     $("akun-email").textContent = user.email;
-    $("list").innerHTML = '<div class="empty">Memuat data...</div>';
 
-    try {
-      await App.store.load();
-      App.render.all();
-    } catch (error) {
-      console.error(error);
-      App.render.all();
-      $("list").innerHTML =
-        `<div class="empty">Gagal memuat data: ${error.message || "periksa koneksi internet"}</div>`;
+    App.store.useUser(user.id); // tampilkan dulu salinan data di HP
+    App.render.all();
+    App.sync.run();             // lalu sinkron dengan Supabase
+  };
+
+  /** Keluar hanya boleh jika tidak ada data yang tertinggal di HP */
+  const canLogout = () => {
+    if (!navigator.onLine) return "Perlu internet untuk keluar akun.";
+
+    const menunggu = App.store.queueLength();
+    if (menunggu) {
+      return `Masih ada ${menunggu} perubahan yang belum terkirim. Tunggu sampai status "Tersinkron", lalu coba lagi.`;
     }
+    return "";
   };
 
   const leaveApp = () => {
-    App.store.reset();
+    App.store.forgetUser();
     App.render.all();
     showView("home");
     App.auth.showLogin();
@@ -136,6 +138,8 @@
     initTheme();
     initReset();
     App.sheet.init();
+    App.pwa.init();
+    App.sync.init();
     App.render.all();
 
     if (!App.db.configured) {
@@ -144,7 +148,7 @@
       return;
     }
 
-    App.auth.init({ onLogout: leaveApp });
+    App.auth.init({ canLogout, onLogout: leaveApp });
 
     const user = await App.auth.getUser();
     if (user) {
