@@ -1,0 +1,56 @@
+/* ==========================================================
+   Variabel desain: warna, font, ukuran
+   ========================================================== */
+
+:root {
+  /* Warna (tema terang) */
+  --bg: #F2F6F4;
+  --surface: #FFFFFF;
+  --ink: #14262B;
+  --muted: #5E7378;
+  --line: #DCE6E3;
+  --chip: #E3EFEC;
+  --brand: #0F5C5A;
+  --brand-ink: #FFFFFF;
+  --in: #1A7F54;     /* pemasukan */
+  --out: #BF3F35;    /* pengeluaran */
+
+  /* Font */
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Sudut membulat */
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+}
+
+/* Tema gelap otomatis (mengikuti pengaturan HP),
+   kecuali pengguna memilih tema terang secara manual */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1A1C;
+    --surface: #162629;
+    --ink: #E7F0EE;
+    --muted: #93A9AD;
+    --line: #243A3E;
+    --chip: #1E3336;
+    --brand: #4FB3A9;
+    --brand-ink: #08201F;
+    --in: #4CC38A;
+    --out: #F0776C;
+  }
+}
+
+/* Tema gelap manual (dipilih di Pengaturan) */
+:root[data-theme="dark"] {
+  --bg: #0E1A1C;
+  --surface: #162629;
+  --ink: #E7F0EE;
+  --muted: #93A9AD;
+  --line: #243A3E;
+  --chip: #1E3336;
+  --brand: #4FB3A9;
+  --brand-ink: #08201F;
+  --in: #4CC38A;
+  --out: #F0776C;
+}

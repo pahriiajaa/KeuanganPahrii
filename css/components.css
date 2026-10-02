@@ -1,0 +1,406 @@
+/* ==========================================================
+   Komponen: pemilih bulan, kartu saldo, daftar transaksi,
+   grafik, menu bawah, form, tombol
+   ========================================================== */
+
+/* ---------- Pemilih bulan ---------- */
+
+.month {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--chip);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.month button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.month span {
+  min-width: 104px;
+  text-align: center;
+}
+
+/* ---------- Kartu saldo ---------- */
+
+.balance {
+  margin-top: 8px;
+  padding: 22px 20px 18px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-radius: var(--radius-lg);
+}
+
+.balance p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.balance .total {
+  margin: 2px 0 16px;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.flow div {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+}
+
+.flow strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ---------- Daftar transaksi ---------- */
+
+.list {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.tx {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tx + .tx {
+  border-top: 1px solid var(--line);
+}
+
+.ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: var(--chip);
+  border-radius: var(--radius-sm);
+  font-size: 1.2rem;
+}
+
+.tx-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-main b {
+  display: block;
+  overflow: hidden;
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tx-main small {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.amt {
+  font-size: 0.92rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.amt.in  { color: var(--in); }
+.amt.out { color: var(--out); }
+
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ---------- Grafik laporan ---------- */
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 16px 12px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.pair {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 110px;
+}
+
+.pair i {
+  width: 36%;
+  min-height: 2px;
+  border-radius: 6px 6px 2px 2px;
+}
+
+.pair .bar-in  { background: var(--in); }
+.pair .bar-out { background: var(--out); }
+
+.col small {
+  display: block;
+  margin-top: 6px;
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.col.now small {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 3px;
+}
+
+.dot-in  { background: var(--in); }
+.dot-out { background: var(--out); }
+
+/* ---------- Baris ringkasan ---------- */
+
+.rows {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  font-size: 0.9rem;
+}
+
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+
+.row span:first-child {
+  color: var(--muted);
+}
+
+.row span:last-child {
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ---------- Tombol tambah (+) ---------- */
+
+.fab {
+  position: fixed;
+  right: max(16px, calc(50% - 224px));
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-size: 1.9rem;
+  line-height: 1;
+  box-shadow: 0 8px 20px rgba(15, 92, 90, 0.35);
+  cursor: pointer;
+}
+
+/* ---------- Menu bawah ---------- */
+
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+.nav-in {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: 0.74rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.nav button span {
+  font-size: 1.25rem;
+}
+
+.nav button[aria-current="page"] {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+/* ---------- Form (lembar dari bawah) ---------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 22, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+
+.sheet h2 {
+  font-size: 1.05rem;
+}
+
+body.open .scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.open .sheet {
+  transform: none;
+}
+
+label {
+  display: block;
+  margin: 12px 0 4px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Pilihan segmen (Pengeluaran/Pemasukan, Tema) ---------- */
+
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 14px;
+  padding: 4px;
+  background: var(--chip);
+  border-radius: 14px;
+}
+
+.seg.seg-three {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 0;
+}
+
+.seg button {
+  padding: 9px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  font-weight: 700;
+}
+
+/* ---------- Tombol ---------- */
+
+.btn-primary {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-danger {
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid var(--out);
+  border-radius: 14px;
+  background: none;
+  color: var(--out);
+  font-weight: 700;
+  cursor: pointer;
+}

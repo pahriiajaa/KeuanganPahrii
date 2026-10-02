@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F5C5A">
+  <title>Catatan Keuangan</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Library Supabase (dari internet) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Urutan script penting: yang di atas dipakai oleh yang di bawah -->
+  <script defer src="js/config.js"></script>
+  <script defer src="js/utils.js"></script>
+  <script defer src="js/supabase.js"></script>
+  <script defer src="js/auth.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/store.js"></script>
+  <script defer src="js/render.js"></script>
+  <script defer src="js/sheet.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+
+  <main class="app">
+
+    <!-- Judul + pemilih bulan -->
+    <header class="top">
+      <h1 id="judul">Catatan Keuangan</h1>
+      <div class="month" id="monthbox">
+        <button type="button" id="prev" aria-label="Bulan sebelumnya">‹</button>
+        <span id="bulan"></span>
+        <button type="button" id="next" aria-label="Bulan berikutnya">›</button>
+      </div>
+    </header>
+
+    <!-- Halaman: Beranda -->
+    <div id="v-home">
+      <div class="balance">
+        <p>Saldo bulan ini</p>
+        <div class="total" id="saldo">Rp0</div>
+        <div class="flow">
+          <div><p>Pemasukan</p><strong id="masuk">Rp0</strong></div>
+          <div><p>Pengeluaran</p><strong id="keluar">Rp0</strong></div>
+        </div>
+      </div>
+
+      <section>
+        <h2>Transaksi</h2>
+        <div class="list" id="list"></div>
+      </section>
+    </div>
+
+    <!-- Halaman: Laporan -->
+    <div id="v-laporan" hidden>
+      <section class="section-first">
+        <h2>6 bulan terakhir</h2>
+        <div class="chart" id="chart"></div>
+        <div class="legend">
+          <span><b class="dot dot-in"></b>Pemasukan</span>
+          <span><b class="dot dot-out"></b>Pengeluaran</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Ringkasan bulan ini</h2>
+        <div class="rows" id="stats"></div>
+      </section>
+    </div>
+
+    <!-- Halaman: Pengaturan -->
+    <div id="v-set" hidden>
+      <section class="section-first">
+        <h2>Tampilan</h2>
+        <div class="seg seg-three" id="tema">
+          <button type="button" data-th="auto">Otomatis</button>
+          <button type="button" data-th="light">Terang</button>
+          <button type="button" data-th="dark">Gelap</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Akun</h2>
+        <div class="rows">
+          <div class="row"><span>Masuk sebagai</span><span id="akun-email">-</span></div>
+        </div>
+        <button class="btn-danger" type="button" id="logout">Keluar</button>
+      </section>
+
+      <section>
+        <h2>Data</h2>
+        <button class="btn-danger" type="button" id="reset">Hapus semua data</button>
+        <p class="note">Menghapus semua transaksi di akunmu. Data yang sudah dihapus tidak bisa dikembalikan.</p>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Tombol tambah + menu bawah -->
+  <button class="fab" type="button" id="add" aria-label="Tambah transaksi">+</button>
+
+  <nav class="nav" aria-label="Menu utama">
+    <div class="nav-in">
+      <button type="button" data-v="home" aria-current="page"><span>🏠</span>Beranda</button>
+      <button type="button" data-v="laporan"><span>📊</span>Laporan</button>
+      <button type="button" data-v="set"><span>⚙️</span>Pengaturan</button>
+    </div>
+  </nav>
+
+  <!-- Form tambah / ubah transaksi -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="Transaksi">
+    <h2 id="sheet-judul">Tambah transaksi</h2>
+
+    <div class="seg" id="jenis">
+      <button type="button" data-type="out" aria-pressed="true">Pengeluaran</button>
+      <button type="button" data-type="in" aria-pressed="false">Pemasukan</button>
+    </div>
+
+    <label for="nominal">Nominal (Rp)</label>
+    <input id="nominal" type="number" inputmode="numeric" placeholder="25000">
+
+    <label for="catatan">Catatan</label>
+    <input id="catatan" type="text" placeholder="Contoh: makan siang">
+
+    <label for="tanggal">Tanggal</label>
+    <input id="tanggal" type="date">
+
+    <p class="form-error" id="sheet-error" hidden></p>
+
+    <button class="btn-primary" type="button" id="save">Simpan transaksi</button>
+    <button class="btn-danger" type="button" id="del" hidden>Hapus transaksi</button>
+  </div>
+
+  <!-- Layar login -->
+  <div class="login" id="login" hidden>
+    <form class="login-box" id="login-form">
+      <h1>Catatan Keuangan</h1>
+      <p class="login-sub">Masuk untuk melihat catatanmu di perangkat mana pun.</p>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required>
+
+      <label for="password">Kata sandi</label>
+      <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+
+      <p class="form-error" id="login-pesan" aria-live="polite"></p>
+
+      <button class="btn-primary" type="submit" id="masuk-btn">Masuk</button>
+      <button class="btn-secondary" type="button" id="daftar-btn">Buat akun baru</button>
+    </form>
+  </div>
+
+</body>
+</html>
