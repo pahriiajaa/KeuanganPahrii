@@ -1,6 +1,8 @@
 /* ==========================================================
    sheet.js
    Form tambah / ubah / hapus transaksi (lembar dari bawah).
+   Perubahan langsung tersimpan di HP, lalu dikirim ke
+   Supabase di latar belakang (lihat sync.js).
    ========================================================== */
 
 App.sheet = (() => {
@@ -21,20 +23,6 @@ App.sheet = (() => {
     });
   };
 
-  const saveLabel = () => (editId ? "Simpan perubahan" : "Simpan transaksi");
-
-  const setError = (teks) => {
-    $("sheet-error").textContent = teks;
-    $("sheet-error").hidden = !teks;
-  };
-
-  /** Nonaktifkan tombol selama menunggu database */
-  const setBusy = (sibuk) => {
-    $("save").disabled = sibuk;
-    $("del").disabled = sibuk;
-    $("save").textContent = sibuk ? "Menyimpan..." : saveLabel();
-  };
-
   /** Tanggal awal untuk transaksi baru */
   const defaultDate = () =>
     App.store.isCurrentMonth()
@@ -47,9 +35,8 @@ App.sheet = (() => {
     const item = editId ? App.store.find(editId) : null;
 
     $("sheet-judul").textContent = item ? "Ubah transaksi" : "Tambah transaksi";
-    $("save").textContent = saveLabel();
+    $("save").textContent = item ? "Simpan perubahan" : "Simpan transaksi";
     $("del").hidden = !item;
-    setError("");
 
     setType(item ? item.t : "out");
     $("nominal").value = item ? item.a : "";
@@ -61,7 +48,15 @@ App.sheet = (() => {
 
   const close = () => setOpen(false);
 
-  const handleSave = async () => {
+  /** Setelah data berubah: gambar ulang lalu kirim ke Supabase */
+  const finish = () => {
+    close();
+    App.render.all();
+    App.sync.showIdleStatus();
+    App.sync.run();
+  };
+
+  const handleSave = () => {
     const nominal = parseInt($("nominal").value, 10);
     if (!nominal || nominal <= 0) {
       $("nominal").focus();
@@ -73,34 +68,16 @@ App.sheet = (() => {
       $("catatan").value.trim() || (type === "in" ? "Pemasukan" : "Pengeluaran");
     const data = { t: type, n: catatan, a: nominal, d: tanggal };
 
-    setError("");
-    setBusy(true);
-    try {
-      if (editId) await App.store.update(editId, data);
-      else await App.store.add(data);
+    if (editId) App.store.update(editId, data);
+    else App.store.add(data);
 
-      App.store.goToDate(tanggal); // tampilkan bulan transaksi yang baru disimpan
-      close();
-      App.render.all();
-    } catch {
-      setError("Gagal menyimpan. Periksa koneksi internet lalu coba lagi.");
-    } finally {
-      setBusy(false);
-    }
+    App.store.goToDate(tanggal); // tampilkan bulan transaksi yang baru disimpan
+    finish();
   };
 
-  const handleDelete = async () => {
-    setError("");
-    setBusy(true);
-    try {
-      await App.store.remove(editId);
-      close();
-      App.render.all();
-    } catch {
-      setError("Gagal menghapus. Periksa koneksi internet lalu coba lagi.");
-    } finally {
-      setBusy(false);
-    }
+  const handleDelete = () => {
+    App.store.remove(editId);
+    finish();
   };
 
   /** Pasang semua tombol */
