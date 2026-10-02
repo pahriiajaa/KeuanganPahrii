@@ -404,3 +404,75 @@ select {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ---------- Layar login ---------- */
+
+.login {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.login-box {
+  width: 100%;
+  max-width: 380px;
+  padding: 28px 24px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.login-box h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.login-sub {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Saat layar login tampil, sembunyikan isi aplikasi di belakangnya */
+body.login-open .app,
+body.login-open .fab,
+body.login-open .nav,
+body.login-open .sheet,
+body.login-open .scrim {
+  display: none;
+}
+
+.btn-secondary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.form-error {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--out);
+}
+
+.form-error[hidden] {
+  display: none;
+}
