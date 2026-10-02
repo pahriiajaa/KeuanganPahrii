@@ -14,6 +14,7 @@
   --brand-ink: #FFFFFF;
   --in: #1A7F54;     /* pemasukan */
   --out: #BF3F35;    /* pengeluaran */
+  --warn: #A8670F;   /* peringatan (offline) */
 
   /* Font */
   --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -38,6 +39,7 @@
     --brand-ink: #08201F;
     --in: #4CC38A;
     --out: #F0776C;
+    --warn: #E5B64B;
   }
 }
 
@@ -53,4 +55,5 @@
   --brand-ink: #08201F;
   --in: #4CC38A;
   --out: #F0776C;
+  --warn: #E5B64B;
 }
