@@ -481,3 +481,32 @@ body.login-open .scrim {
 .form-error[hidden] {
   display: none;
 }
+
+/* ---------- Status sinkron ---------- */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status[data-state="ok"]::before      { background: var(--in); }
+.status[data-state="offline"]         { color: var(--warn); }
+.status[data-state="offline"]::before { background: var(--warn); }
+.status[data-state="error"]           { color: var(--out); }
+.status[data-state="error"]::before   { background: var(--out); }
+
+.btn-install {
+  margin-top: 0;
+   }
