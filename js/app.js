@@ -113,10 +113,11 @@
     try {
       await App.store.load();
       App.render.all();
-    } catch {
+    } catch (error) {
+      console.error(error);
       App.render.all();
       $("list").innerHTML =
-        '<div class="empty">Gagal memuat data. Periksa koneksi internet lalu muat ulang halaman.</div>';
+        `<div class="empty">Gagal memuat data: ${error.message || "periksa koneksi internet"}</div>`;
     }
   };
 
@@ -138,17 +139,20 @@
     App.render.all();
 
     if (!App.db.configured) {
-      $("login-form").addEventListener("submit", (event) => event.preventDefault());
       App.auth.showLogin();
       App.auth.setMessage("Belum tersambung ke Supabase. Isi dulu file js/config.js.");
       return;
     }
 
-    App.auth.init({ onLogin: enterApp, onLogout: leaveApp });
+    App.auth.init({ onLogout: leaveApp });
 
     const user = await App.auth.getUser();
-    if (user) enterApp(user);
-    else App.auth.showLogin();
+    if (user) {
+      App.auth.hideLogin();
+      enterApp(user);
+    } else {
+      App.auth.showLogin();
+    }
   };
 
   start();
